@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mission_6_esiapes.Models;
 using System;
@@ -11,12 +12,10 @@ namespace Mission_6_esiapes.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
 
         private MovieEntryContext MovieContext { get; set; }
-        public HomeController(ILogger<HomeController> logger, MovieEntryContext x)
+        public HomeController( MovieEntryContext x)
         {
-            _logger = logger;
             MovieContext = x;
 
         }
@@ -33,22 +32,67 @@ namespace Mission_6_esiapes.Controllers
         [HttpGet]//get method and result
         public IActionResult MovieEntry()
         {
+            ViewBag.Categories = MovieContext.Category.ToList();
+
             return View();
         }
         [HttpPost]//post method and result
         public IActionResult MovieEntry(ApplicationResponse ar)
         {
-            MovieContext.Add(ar);
-            MovieContext.SaveChanges();
-            return View("Confirmation");
+            if (ModelState.IsValid)
+            {
+                MovieContext.Add(ar);
+                MovieContext.SaveChanges();
+                return View("Confirmation", ar);
+            }
+            else
+            {
+                ViewBag.Majors = MovieContext.Category.ToList();
+
+                return View(ar);
+            }
         }
 
-
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult MovieList()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var movies = MovieContext.Responses
+                .Include(x => x.Category)
+                .OrderBy(x => x.Title)
+                .ToList();
+            return View(movies);
+        }
+        [HttpGet]
+        public IActionResult Edit(int movieID)
+        {
+            ViewBag.Categories = MovieContext.Category.ToList();
+
+            var entry = MovieContext.Responses
+                .Single(x => x.MovieID == movieID);
+
+            return View("MovieEntry", entry);
+        }
+        [HttpPost]
+        public IActionResult Edit(ApplicationResponse blah)
+        {
+            MovieContext.Update(blah);
+            MovieContext.SaveChanges();
+            return RedirectToAction("MovieList");
+        }
+        [HttpGet]
+        public IActionResult Delete(int movieId)
+        {
+            var entry = MovieContext.Responses
+                .Single(x => x.MovieID == movieId);
+
+            return View(entry);
+        }
+        [HttpPost]
+        public IActionResult Delete(ApplicationResponse ar)
+        {
+            MovieContext.Responses.Remove(ar);
+            MovieContext.SaveChanges();
+
+            return RedirectToAction("MovieList");
         }
     }
 }

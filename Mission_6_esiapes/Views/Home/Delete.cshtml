@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Delete Page";
+}
+
+@model ApplicationResponse
+<h3>Confirm Deletion</h3>
+<br />
+<h4>Are you sure you want to delete the application for @Model.Title?</h4>
+
+<form method="post" asp-action="Delete">
+    <button type="submit">Delete</button>
+    <a asp-controller="Home" asp-action="MovieList" class="btn btn-primary">Cancel</a>
+
+    <input type="hidden" asp-for="MovieID" />
+</form>

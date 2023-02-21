@@ -11,14 +11,21 @@ namespace Mission_6_esiapes.Models
         [Key]
         [Required]
         public int MovieID { get; set; }
-        public string Category { get; set; }
+        
+        //Build a foreign Key relationship
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
 
+        [Required]
         public string Title { get; set; }
 
+        [Required]
         public int Year { get; set; }
 
+        [Required]
         public string Director { get; set; }
 
+        [Required]
         public string Rating { get; set; }
 
         public bool Edited { get; set; }
